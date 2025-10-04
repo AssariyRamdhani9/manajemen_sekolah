@@ -20,6 +20,6 @@ class Schedule extends Model
 
     public function classSubjectTeacher()
     {
-        return $this->belongsTo(ClassSubjectTeacher::class, 'class_subject_teacher_id');
+        return $this->belongsTo(ClassSubjectTeacher::class);
     }
 }

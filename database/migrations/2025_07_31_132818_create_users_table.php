@@ -12,16 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); // SERIAL PRIMARY KEY
-            $table->string('full_name'); // VARCHAR(255)
-            $table->string('email')->unique(); // VARCHAR(255) UNIQUE
-            $table->string('password'); // VARCHAR(255)
-            $table->string('role', 50); // VARCHAR(50)
-            $table->string('phone_number', 20)->nullable(); // VARCHAR(20), opsional
-            $table->string('profile_picture_url')->nullable(); // VARCHAR(255), opsional
-            $table->boolean('is_active')->default(true); // BOOLEAN DEFAULT TRUE
-            $table->rememberToken(); // VARCHAR(100) for "remember me"
-            $table->timestamps(); // created_at and updated_at TIMESTAMP WITH TIME ZONE
+            $table->id();
+            $table->string('full_name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->enum('role', ['admin', 'guru', 'siswa'])->default('siswa');
+            $table->timestamps();
         });
     }
 

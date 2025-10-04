@@ -1,57 +1,80 @@
 <?php
 
-// app/Http/Controllers/AuthController.php
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Student;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    /**
+     * Menangani proses pendaftaran user baru.
+     */
+   public function register(Request $request)
     {
         $request->validate([
-            'full_name' => 'required',
+            'full_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:admin,teacher,student',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
+        User::create([
             'full_name' => $request->full_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => 'siswa', // default siswa, atau bisa sesuai input
         ]);
 
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+        return redirect()->route('login')->with('success', 'Pendaftaran berhasil!');
     }
 
+    //Login
     public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+        'role' => 'required|string',
+    ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json(['access_token' => $token, 'user' => $user]);
+    // Cek email+password
+    if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        return response()->json([
+            'message' => 'Email atau password salah!'
+        ], 401);
     }
+
+    $user = Auth::user();
+
+    // Cek role
+    if ($user->role !== $credentials['role']) {
+        return response()->json([
+            'message' => 'Role tidak sesuai!'
+        ], 403);
+    }
+
+    // Token
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Login berhasil',
+        'user' => $user,
+        'token' => $token
+    ]);
+}
+
+
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        $request->user()->tokens()->delete();
+        return response()->json(['message' => 'Logout berhasil']);
     }
+
 }

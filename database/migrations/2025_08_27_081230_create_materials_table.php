@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_subject_teacher_id')->constrained('class_subject_teacher')->onDelete('cascade');
+            $table->foreignId('class_subject_teacher_id')->constrained('class_subject_teachers')->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('file_url');

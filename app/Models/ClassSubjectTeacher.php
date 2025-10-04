@@ -10,14 +10,14 @@ class ClassSubjectTeacher extends Model
 {
     use HasFactory;
 
-    protected $table = 'class_subject_teacher';
+    protected $table = 'class_subject_teachers';
     protected $fillable = [
         'class_id',
         'subject_id',
         'teacher_id',
     ];
 
-    public function class()
+    public function schoolClass()
     {
         return $this->belongsTo(Classes::class, 'class_id');
     }

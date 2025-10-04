@@ -1,67 +1,50 @@
 <?php
 
-// routes/api.php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\ClassController;
+use App\Http\Controllers\ScheduleController;
 
-// Authentication Routes
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+// --- Rute Autentikasi ---
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
-// Protected Routes with Sanctum
+// --- Grup Rute yang Dilindungi ---
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::get('/user', fn (Request $request) => $request->user());
+
+    // =========================
+    // Rute untuk Admin
+    // =========================
+        Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+        Route::apiResource('students', StudentController::class);
+        Route::apiResource('teachers', TeacherController::class);
+        Route::apiResource('subjects', SubjectController::class);
+        Route::apiResource('classes', ClassController::class);
     });
 
-    // Admin Routes
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
-        // Student Management
-        Route::apiResource('students', AdminController::class);
 
-        // Teacher Management
-        Route::apiResource('teachers', AdminController::class);
-        
-        // Classes and Subjects Management
-        Route::apiResource('classes', AdminController::class);
-        Route::apiResource('subjects', AdminController::class);
-        Route::apiResource('class-subject-teacher', AdminController::class);
-        
-        // Announcement Management
-        Route::apiResource('announcements', AdminController::class);
+    // =========================
+    // Rute untuk Guru
+    // =========================
+    Route::middleware('role:guru')->prefix('guru')->group(function () {
+        Route::apiResource('schedules', ScheduleController::class);
+        Route::get('schedules/data', [ScheduleController::class, 'getFormData']);
+        Route::get('classes', [ClassController::class, 'index']);
+        Route::get('subjects', [SubjectController::class, 'index']);
     });
 
-    // Teacher Routes
-    Route::middleware('role:teacher')->prefix('teacher')->group(function () {
-        // Schedule Management
-        Route::apiResource('schedules', TeacherController::class);
-
-        // Materials Management
-        Route::apiResource('materials', TeacherController::class);
-
-        // Assignment Management
-        Route::apiResource('assignments', TeacherController::class);
-
-        // Attendance Management
-        Route::apiResource('attendances', TeacherController::class);
-
-        // Submission Management
-        Route::apiResource('submissions', TeacherController::class);
+    // =========================
+    // Rute untuk Siswa
+    // =========================
+    Route::middleware('role:siswa')->prefix('siswa')->group(function () {
+        Route::get('schedules', [ScheduleController::class, 'index']);
+        // Tambahin rute tugas/materi di sini
+        // Route::get('tasks', [TaskController::class, 'index']);
     });
-
-    // Student Routes
-    Route::middleware('role:student')->prefix('student')->group(function () {
-        Route::get('schedules', [StudentController::class, 'getSchedules']);
-        Route::get('materials', [StudentController::class, 'getMaterials']);
-        Route::get('assignments', [StudentController::class, 'getAssignments']);
-        Route::post('submissions', [StudentController::class, 'submitAssignment']);
-        Route::get('attendances', [StudentController::class, 'getAttendances']);
-        Route::get('announcements', [StudentController::class, 'getAnnouncements']);
-    });
-
 });
