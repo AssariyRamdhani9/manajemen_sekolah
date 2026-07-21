@@ -100,4 +100,55 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'Gagal menyimpan absensi.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Memproses presensi berbasis pemindaian QR Code (NIS).
+     */
+    public function scanQr(Request $request)
+    {
+        $request->validate([
+            'nis' => 'required|string',
+            'date' => 'nullable|date',
+        ]);
+
+        $nis = trim($request->nis);
+        $date = $request->date ?? now()->toDateString();
+
+        $student = Student::where('nis', $nis)->with('user', 'class')->first();
+
+        if (!$student) {
+            return response()->json(['message' => "Siswa dengan NIS '{$nis}' tidak ditemukan!"], 404);
+        }
+
+        $cst = ClassSubjectTeacher::firstOrCreate([
+            'class_id' => $student->class_id ?? 1,
+            'subject_id' => \App\Models\Subject::first()?->id ?? 1,
+            'teacher_id' => \App\Models\Teacher::first()?->id ?? 1,
+        ]);
+
+        $attendance = Attendance::updateOrCreate(
+            [
+                'student_id' => $student->id,
+                'date' => $date,
+            ],
+            [
+                'class_subject_teacher_id' => $cst->id,
+                'status' => 'Hadir',
+                'notes' => 'Presensi via Scanner QR Code (' . now()->format('H:i:s') . ')',
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Presensi QR Code Berhasil!',
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->user ? $student->user->full_name : 'Siswa',
+                'nis' => $student->nis,
+                'class_name' => $student->class ? $student->class->name : '-',
+            ],
+            'status' => 'Hadir',
+            'time' => now()->format('H:i:s'),
+            'date' => $date,
+        ]);
+    }
 }

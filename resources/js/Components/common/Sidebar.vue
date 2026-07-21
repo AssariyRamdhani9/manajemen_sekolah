@@ -140,6 +140,14 @@ const IconExam = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'no
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z' })
 ])
 
+const IconScan = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z' })
+])
+
+const IconCard = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 012-2h2a2 2 0 012 2v1m-6 0h6' })
+])
+
 const links = computed(() => {
   const r = props.role
   if (r === 'admin') {
@@ -149,6 +157,7 @@ const links = computed(() => {
       { name: 'Manajemen Guru', path: '/admin/teachers', icon: IconTeachers },
       { name: 'Manajemen Kelas', path: '/admin/classes', icon: IconClasses },
       { name: 'Mata Pelajaran', path: '/admin/subjects', icon: IconSubjects },
+      { name: 'Scan QR Absensi', path: '/teacher/qr-scanner', icon: IconScan },
       { name: 'Absensi Siswa', path: '/teacher/attendances', icon: IconAttendance },
       { name: 'Penilaian & Rapor', path: '/teacher/grades', icon: IconGrades },
       { name: 'Ujian Online (CBT)', path: '/teacher/exams', icon: IconExam },
@@ -158,6 +167,7 @@ const links = computed(() => {
     return [
       { name: 'Dashboard', path: '/dashboard/teacher', icon: IconDashboard },
       { name: 'Jadwal Mengajar', path: '/teacher/schedules', icon: IconSchedule },
+      { name: 'Scan QR Absensi', path: '/teacher/qr-scanner', icon: IconScan },
       { name: 'Absensi Siswa', path: '/teacher/attendances', icon: IconAttendance },
       { name: 'Penilaian & Rapor', path: '/teacher/grades', icon: IconGrades },
       { name: 'Ujian Online (CBT)', path: '/teacher/exams', icon: IconExam },
@@ -171,6 +181,7 @@ const links = computed(() => {
       { name: 'Jadwal Saya', path: '/student/schedules', icon: IconSchedule },
       { name: 'Tugas Saya', path: '/student/assignments', icon: IconAssignments },
       { name: 'Ujian Saya', path: '/student/exams', icon: IconExam },
+      { name: 'Kartu Pelajar QR', path: '/student/card', icon: IconCard },
       { name: 'Rapor Saya', path: '/student/report', icon: IconGrades },
       { name: 'Pengumuman', path: '/siswa/announcements', icon: IconAnnounce },
     ]

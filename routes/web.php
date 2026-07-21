@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teacher/materials', fn() => Inertia::render('Guru/ManageMaterials'));
         Route::get('/teacher/assignments', fn() => Inertia::render('Guru/ManageAssignments'));
         Route::get('/teacher/attendances', fn() => Inertia::render('Guru/ManageAttendance'));
+        Route::get('/teacher/qr-scanner', fn() => Inertia::render('Guru/QRScanner'));
         Route::get('/teacher/grades', fn() => Inertia::render('Guru/ManageGrades'));
         Route::get('/teacher/exams', fn() => Inertia::render('Guru/ManageExams'));
         Route::get('/teacher/exams/{id}/results', fn($id) => Inertia::render('Guru/ExamResults', ['examId' => $id]));
@@ -73,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/student/schedules', fn() => Inertia::render('Siswa/StudentSchedule'));
         Route::get('/student/assignments', fn() => Inertia::render('Siswa/MyAssignments'));
         Route::get('/student/report', fn() => Inertia::render('Siswa/StudentReport'));
+        Route::get('/student/card', fn() => Inertia::render('Siswa/StudentCard'));
         Route::get('/student/exams', fn() => Inertia::render('Siswa/StudentExams'));
         Route::get('/student/exams/{id}/take', fn($id) => Inertia::render('Siswa/TakeExam', ['examId' => $id]));
         Route::get('/student/announcements', fn() => Inertia::render('Announcements'));
