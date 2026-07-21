@@ -135,6 +135,11 @@ const IconGrades = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: '
   h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' })
 ])
 
+const IconExam = () => h('svg', { xmlns: 'http://www.w3.org/2000/svg', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor' }, [
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z' }),
+  h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z' })
+])
+
 const links = computed(() => {
   const r = props.role
   if (r === 'admin') {
@@ -146,6 +151,7 @@ const links = computed(() => {
       { name: 'Mata Pelajaran', path: '/admin/subjects', icon: IconSubjects },
       { name: 'Absensi Siswa', path: '/teacher/attendances', icon: IconAttendance },
       { name: 'Penilaian & Rapor', path: '/teacher/grades', icon: IconGrades },
+      { name: 'Ujian Online (CBT)', path: '/teacher/exams', icon: IconExam },
       { name: 'Pengumuman', path: '/admin/announcements', icon: IconAnnounce },
     ]
   } else if (r === 'guru' || r === 'teacher') {
@@ -154,6 +160,7 @@ const links = computed(() => {
       { name: 'Jadwal Mengajar', path: '/teacher/schedules', icon: IconSchedule },
       { name: 'Absensi Siswa', path: '/teacher/attendances', icon: IconAttendance },
       { name: 'Penilaian & Rapor', path: '/teacher/grades', icon: IconGrades },
+      { name: 'Ujian Online (CBT)', path: '/teacher/exams', icon: IconExam },
       { name: 'Manajemen Tugas', path: '/teacher/assignments', icon: IconAssignments },
       { name: 'Materi Pembelajaran', path: '/teacher/materials', icon: IconMaterials },
       { name: 'Pengumuman', path: '/teacher/announcements', icon: IconAnnounce },
@@ -163,6 +170,7 @@ const links = computed(() => {
       { name: 'Dashboard', path: '/dashboard/siswa', icon: IconDashboard },
       { name: 'Jadwal Saya', path: '/student/schedules', icon: IconSchedule },
       { name: 'Tugas Saya', path: '/student/assignments', icon: IconAssignments },
+      { name: 'Ujian Saya', path: '/student/exams', icon: IconExam },
       { name: 'Rapor Saya', path: '/student/report', icon: IconGrades },
       { name: 'Pengumuman', path: '/siswa/announcements', icon: IconAnnounce },
     ]

@@ -32,6 +32,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/grades', [\App\Http\Controllers\GradeController::class, 'index']);
     Route::post('/grades', [\App\Http\Controllers\GradeController::class, 'store']);
     Route::get('/student/report', [\App\Http\Controllers\GradeController::class, 'studentReport']);
+
+    Route::apiResource('exams', \App\Http\Controllers\ExamController::class);
+    Route::post('/exams/{exam}/questions', [\App\Http\Controllers\ExamController::class, 'addQuestion']);
+    Route::delete('/exam-questions/{question}', [\App\Http\Controllers\ExamController::class, 'deleteQuestion']);
+    Route::post('/exams/{exam}/start', [\App\Http\Controllers\ExamController::class, 'startAttempt']);
+    Route::post('/exams/{exam}/submit', [\App\Http\Controllers\ExamController::class, 'submitAttempt']);
+    Route::get('/exams/{exam}/results', [\App\Http\Controllers\ExamController::class, 'results']);
     
     // PERBAIKAN KRUSIAL DI SINI: Memuat relasi teacher
     // Ini memastikan frontend mendapatkan teacher.id = 1 (yang benar)
