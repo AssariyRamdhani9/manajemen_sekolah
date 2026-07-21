@@ -1,153 +1,194 @@
 <template>
-  <div class="min-h-screen flex bg-gray-50">
-    <!-- Sidebar -->
-    <Sidebar role="student" />
+  <AppLayout role="siswa">
+    <!-- Header Banner Siswa -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-sky-950 via-blue-900 to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl border border-sky-900/40 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
-    <!-- Main Content -->
-    <main class="flex-grow p-6 sm:p-10 transition-all duration-300">
-      <!-- Header -->
-      <header class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-extrabold text-gray-900">Dashboard Siswa</h1>
-          <p class="text-gray-600 mt-2">Halo, {{ profile.name }}! Berikut ringkasan akademik kamu.</p>
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-semibold mb-3">
+          <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+          Portal Pembelajaran Siswa
         </div>
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2 text-sm text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {{ currentDate }}
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Selamat Datang, {{ profile.name }}! 👋</h1>
+        <p class="text-sky-100 text-sm mt-1">Kelas: <span class="font-semibold text-white">{{ profile.class }}</span> • Pantau jadwal harian dan tugas sekolah kamu di sini.</p>
+      </div>
+
+      <div class="relative z-10">
+        <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-xs text-slate-200 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V8H3v11a2 2 0 002 2z" />
+          </svg>
+          {{ currentDate }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards Siswa -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Persentase Kehadiran</p>
+        <h3 class="text-3xl font-extrabold text-slate-800 mt-2 tracking-tight">{{ attendance.present }}/{{ attendance.total }}</h3>
+        <p class="text-xs text-emerald-600 font-semibold mt-2">Target kehadiran terpenuhi</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tugas Mendekati Tenggat</p>
+        <h3 class="text-3xl font-extrabold text-rose-600 mt-2 tracking-tight">{{ assignmentsDue.length }}</h3>
+        <p class="text-xs text-rose-500 font-semibold mt-2">Segera kumpulkan</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nilai Terbaru Ditambahkan</p>
+        <h3 class="text-3xl font-extrabold text-sky-600 mt-2 tracking-tight">{{ latestGrades.length }}</h3>
+        <p class="text-xs text-slate-500 mt-2">Evaluasi tugas terbaru</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pengumuman Sekolah</p>
+        <h3 class="text-3xl font-extrabold text-slate-800 mt-2 tracking-tight">{{ announcements.length }}</h3>
+        <p class="text-xs text-slate-500 mt-2">Informasi penting</p>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Schedule Today -->
+      <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span>📅 Jadwal Pelajaran Hari Ini</span>
+        </h2>
+        <div class="space-y-3">
+          <div 
+            v-for="(schedule, index) in todaySchedule" 
+            :key="index" 
+            class="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-white hover:border-sky-200 hover:shadow-md transition-all flex items-center justify-between"
+          >
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">{{ schedule.subject }}</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Kelas: {{ schedule.class }} • {{ schedule.room }}</p>
+            </div>
+            <span class="px-3 py-1 rounded-xl bg-sky-50 text-sky-700 font-bold text-xs border border-sky-100">
+              {{ schedule.time }}
+            </span>
           </div>
         </div>
-      </header>
+      </div>
 
-      <!-- Ringkasan Akademik -->
-      <section class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <h3 class="text-sm font-medium text-gray-500">Kehadiran</h3>
-          <p class="text-2xl font-bold mt-2">{{ attendance.present }}/{{ attendance.total }}</p>
-          <p class="text-sm text-gray-500">Hadir dari total pertemuan</p>
+      <!-- Quick Shortcuts -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Akses Cepat Siswa</h2>
+        <div class="space-y-3">
+          <Link href="/student/assignments" class="w-full p-4 rounded-2xl bg-sky-50 hover:bg-sky-100/80 border border-sky-200/60 text-sky-900 font-bold text-xs flex items-center justify-between transition-all">
+            <span>📖 Tugas & Respon Pengumpulan</span>
+            <span>→</span>
+          </Link>
+          <Link href="/student/schedules" class="w-full p-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/60 text-indigo-900 font-bold text-xs flex items-center justify-between transition-all">
+            <span>📅 Jadwal Pelajaran Lengkap</span>
+            <span>→</span>
+          </Link>
+          <Link href="/siswa/announcements" class="w-full p-4 rounded-2xl bg-purple-50 hover:bg-purple-100/80 border border-purple-200/60 text-purple-900 font-bold text-xs flex items-center justify-between transition-all">
+            <span>📢 Papan Pengumuman</span>
+            <span>→</span>
+          </Link>
         </div>
+      </div>
+    </div>
 
-        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <h3 class="text-sm font-medium text-gray-500">Tugas Mendekati Deadline</h3>
-          <p class="text-2xl font-bold mt-2">{{ assignmentsDue.length }}</p>
-          <p class="text-sm text-gray-500">Tugas harus segera dikumpulkan</p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-yellow-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <h3 class="text-sm font-medium text-gray-500">Nilai Terbaru</h3>
-          <p class="text-2xl font-bold mt-2">{{ latestGrades.length }}</p>
-          <p class="text-sm text-gray-500">Nilai baru minggu ini</p>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-red-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <h3 class="text-sm font-medium text-gray-500">Pengumuman</h3>
-          <p class="text-2xl font-bold mt-2">{{ announcements.length }}</p>
-          <p class="text-sm text-gray-500">Pengumuman terbaru</p>
-        </div>
-      </section>
-
-      <!-- Jadwal Hari Ini -->
-      <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">📅 Jadwal Hari Ini</h2>
-        <ul class="divide-y divide-gray-200">
-          <li v-for="(schedule, index) in todaySchedule" :key="index" class="py-3 flex justify-between items-center">
+    <!-- Assignments Due & Latest Grades Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Assignments Due -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span>📌 Tugas Mendekati Tenggat</span>
+        </h2>
+        <div class="space-y-3">
+          <div v-for="(task, index) in assignmentsDue" :key="index" class="p-4 rounded-2xl border border-slate-200/80 bg-rose-50/30 flex items-center justify-between">
             <div>
-              <p class="font-medium text-gray-800">{{ schedule.subject }}</p>
-              <p class="text-sm text-gray-500">Kelas {{ schedule.class }} • {{ schedule.room }}</p>
+              <h4 class="font-bold text-slate-800 text-sm">{{ task.title }}</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Mata Pelajaran: {{ task.subject }}</p>
             </div>
-            <span class="text-sm text-gray-600">{{ schedule.time }}</span>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Tugas Mendekati Deadline -->
-      <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">📌 Tugas Mendekati Tenggat</h2>
-        <ul class="divide-y divide-gray-200">
-          <li v-for="(task, index) in assignmentsDue" :key="index" class="py-3 flex justify-between items-center">
-            <div>
-              <p class="font-medium text-gray-800">{{ task.title }}</p>
-              <p class="text-sm text-gray-500">Mata pelajaran: {{ task.subject }}</p>
-            </div>
-            <span class="text-sm text-red-600">Deadline: {{ task.deadline }}</span>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Nilai Terbaru -->
-      <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">📝 Nilai Terbaru</h2>
-        <ul class="divide-y divide-gray-200">
-          <li v-for="(grade, index) in latestGrades" :key="index" class="py-3 flex justify-between items-center">
-            <div>
-              <p class="font-medium text-gray-800">{{ grade.subject }}</p>
-              <p class="text-sm text-gray-500">{{ grade.assignment }}</p>
-            </div>
-            <span class="text-sm font-bold text-green-600">{{ grade.score }}</span>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Akses Cepat -->
-      <section class="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">⚡ Akses Cepat</h2>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <button class="p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">📖 Lihat Tugas</button>
-          <button class="p-4 bg-green-500 text-white rounded-lg hover:bg-green-600">⬆️ Unggah Tugas</button>
-          <button class="p-4 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">📚 Materi</button>
-          <button class="p-4 bg-red-500 text-white rounded-lg hover:bg-red-600">📢 Pengumuman</button>
+            <span class="px-3 py-1 rounded-xl bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200">
+              Tenggat: {{ task.deadline }}
+            </span>
+          </div>
         </div>
-      </section>
-    </main>
-  </div>
+      </div>
+
+      <!-- Latest Grades -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <span>📝 Nilai Terbaru</span>
+        </h2>
+        <div class="space-y-3">
+          <div v-for="(grade, index) in latestGrades" :key="index" class="p-4 rounded-2xl border border-slate-200/80 bg-emerald-50/30 flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-slate-800 text-sm">{{ grade.subject }}</h4>
+              <p class="text-xs text-slate-500 mt-0.5">{{ grade.assignment }}</p>
+            </div>
+            <span class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-sm shadow-sm">
+              {{ grade.score }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
 </template>
 
-<script>
-import Sidebar from '@/Components/common/Sidebar.vue';
+<script setup>
+import { ref, onMounted } from 'vue'
+import { Link } from '@inertiajs/vue3'
+import axios from 'axios'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
-export default {
-  name: 'StudentDashboard',
-  components: { Sidebar },
-  data() {
-    return {
-      currentDate: new Date().toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }),
-      profile: {
-        name: 'Budi Santoso',
-        class: 'XI IPA 2',
-      },
-      attendance: {
-        present: 40,
-        total: 45,
-      },
-      todaySchedule: [
-        { subject: 'Matematika', class: 'XI IPA 2', room: 'Ruang 201', time: '07:00 - 08:30' },
-        { subject: 'Fisika', class: 'XI IPA 2', room: 'Ruang 202', time: '09:00 - 10:30' },
-        { subject: 'Bahasa Inggris', class: 'XI IPA 2', room: 'Ruang 105', time: '11:00 - 12:30' },
-      ],
-      assignmentsDue: [
-        { title: 'PR Matematika Bab 5', subject: 'Matematika', deadline: '12 Sep 2025' },
-        { title: 'Laporan Praktikum Fisika', subject: 'Fisika', deadline: '13 Sep 2025' },
-      ],
-      latestGrades: [
-        { subject: 'Matematika', assignment: 'Ulangan Bab 4', score: 85 },
-        { subject: 'Bahasa Inggris', assignment: 'Essay', score: 90 },
-      ],
-      announcements: [
-        { id: 1, title: 'Libur Idul Adha 17 Sep 2025' },
-        { id: 2, title: 'Try Out Ujian Nasional 25 Sep 2025' },
-      ],
-    };
-  },
-};
+const props = defineProps({
+  student: Object,
+  user: Object,
+})
+
+const currentDate = new Date().toLocaleDateString('id-ID', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+})
+
+const profile = ref({
+  name: props.user?.full_name || 'Siswa',
+  class: props.student?.class?.name || '-',
+})
+
+const attendance = ref({
+  present: 0,
+  total: 0,
+})
+
+const todaySchedule = ref([])
+const assignmentsDue = ref([])
+const latestGrades = ref([])
+const announcements = ref([])
+
+onMounted(async () => {
+  try {
+    const [scheduleRes, annRes] = await Promise.allSettled([
+      axios.get('/api/siswa/schedules'),
+      axios.get('/api/announcements'),
+    ])
+
+    if (scheduleRes.status === 'fulfilled' && Array.isArray(scheduleRes.value.data)) {
+      todaySchedule.value = scheduleRes.value.data.map(item => ({
+        subject: item.class_subject_teacher?.subject?.name || 'Mata Pelajaran',
+        class: item.class_subject_teacher?.school_class?.name || '-',
+        room: item.room || 'Ruang Kelas',
+        time: `${item.start_time} - ${item.end_time}`,
+      }))
+    }
+
+    if (annRes.status === 'fulfilled' && Array.isArray(annRes.value.data)) {
+      announcements.value = annRes.value.data
+    }
+  } catch (e) {
+    console.error('Gagal memuat data dashboard siswa:', e)
+  }
+})
 </script>
-
-<style scoped>
-/* tambahan opsional */
-</style>

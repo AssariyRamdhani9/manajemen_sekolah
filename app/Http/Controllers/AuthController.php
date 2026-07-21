@@ -36,38 +36,48 @@ class AuthController extends Controller
 
     //Login
     public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required|string',
-        'role' => 'required|string',
-    ]);
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+            'role' => 'required|string',
+        ]);
 
-    // Cek email+password
-    if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        // Cek email+password
+        if (!Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+            return response()->json([
+                'message' => 'Email atau password salah!'
+            ], 401);
+        }
+
+        $user = Auth::user();
+
+        // Cek role
+        $userRole = strtolower($user->role);
+        $reqRole = strtolower($credentials['role']);
+        
+        $isTeacherMatch = ($userRole === 'guru' || $userRole === 'teacher') && ($reqRole === 'guru' || $reqRole === 'teacher');
+
+        if ($userRole !== $reqRole && !$isTeacherMatch) {
+            Auth::logout();
+            return response()->json([
+                'message' => 'Role tidak sesuai!'
+            ], 403);
+        }
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
+        // Token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'message' => 'Email atau password salah!'
-        ], 401);
+            'message' => 'Login berhasil',
+            'user' => $user,
+            'token' => $token
+        ]);
     }
-
-    $user = Auth::user();
-
-    // Cek role
-    if ($user->role !== $credentials['role']) {
-        return response()->json([
-            'message' => 'Role tidak sesuai!'
-        ], 403);
-    }
-
-    // Token
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login berhasil',
-        'user' => $user,
-        'token' => $token
-    ]);
-}
 
 
 

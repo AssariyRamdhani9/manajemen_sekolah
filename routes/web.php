@@ -3,10 +3,16 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
+// Redirect root ke /login
+Route::redirect('/', '/login');
+
 // --- Halaman Auth (Login & Register) ---
 Route::get('/login', function () {
     return Inertia::render('Login');
 })->name('login');
+
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
 
 Route::get('/register', function () {
     return Inertia::render('Register');
@@ -17,15 +23,28 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard sesuai role
     Route::get('/dashboard/admin', function () {
-        return Inertia::render('Admin/AdminDashboard');
+        return Inertia::render('Admin/AdminDashboard', [
+            'stats' => [
+                'students' => \App\Models\Student::count(),
+                'teachers' => \App\Models\Teacher::count(),
+                'activeClasses' => \App\Models\Classes::count(),
+                'submittedAssignments' => \App\Models\Submission::count(),
+            ]
+        ]);
     })->middleware('role:admin')->name('dashboard.admin');
 
     Route::get('/dashboard/teacher', function () {
         return Inertia::render('Guru/TeacherDashboard');
-    })->middleware('role:guru')->name('dashboard.teacher');
+    })->middleware('role:guru,teacher')->name('dashboard.teacher');
 
     Route::get('/dashboard/siswa', function () {
-        return Inertia::render('Siswa/StudentDashboard');
+        $user = auth()->user();
+        $student = $user ? \App\Models\Student::where('user_id', $user->id)->with('class')->first() : null;
+
+        return Inertia::render('Siswa/StudentDashboard', [
+            'student' => $student,
+            'user' => $user,
+        ]);
     })->middleware('role:siswa')->name('dashboard.siswa');
 
     // Admin pages
@@ -37,7 +56,31 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Teacher pages
-    Route::middleware('role:guru')->group(function () {
+    Route::middleware('role:guru,teacher')->group(function () {
         Route::get('/teacher/schedules', fn() => Inertia::render('Guru/ManageSchedules'));
+        Route::get('/teacher/materials', fn() => Inertia::render('Guru/ManageMaterials'));
+        Route::get('/teacher/assignments', fn() => Inertia::render('Guru/ManageAssignments'));
+        Route::get('/teacher/attendances', fn() => Inertia::render('Guru/ManageAttendance'));
+    });
+
+    // Student pages
+    Route::middleware('role:siswa')->group(function () {
+        Route::get('/student/schedules', fn() => Inertia::render('Siswa/StudentSchedule'));
+        Route::get('/student/assignments', fn() => Inertia::render('Siswa/MyAssignments'));
+        Route::get('/student/announcements', function () {
+            return Inertia::render('Announcements');
+        })->name('siswa.announcements');
+    });
+
+    Route::middleware('role:guru,teacher')->prefix('guru')->group(function () {
+        Route::get('/announcements', function () {
+            return Inertia::render('Announcements');
+        })->name('teacher.announcements');
+    });
+
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/announcements', function () {
+            return Inertia::render('Announcements');
+        })->name('admin.announcements');
     });
 });

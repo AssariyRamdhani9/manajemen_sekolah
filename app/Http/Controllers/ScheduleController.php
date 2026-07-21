@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ClassSubjectTeacher;
+use App\Models\Student;
 use App\Models\Schedule;
 use App\Models\Classes;
 use App\Models\Subject;
@@ -14,9 +15,29 @@ class ScheduleController extends Controller
     /**
      * Menampilkan daftar semua jadwal.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $schedules = Schedule::with(['class', 'subject'])->get();
+        $user = $request->user();
+
+        $query = Schedule::with([
+            'classSubjectTeacher.schoolClass', 
+            'classSubjectTeacher.subject',
+            'classSubjectTeacher.teacher'
+        ]);
+
+        // Jika yang mengakses adalah Guru (bukan Admin), filter berdasarkan ID guru tersebut
+        if ($user && strtolower($user->role) !== 'admin') {
+            if ($user->teacher) {
+                $teacherId = $user->teacher->id;
+                $query->whereHas('classSubjectTeacher', function ($q) use ($teacherId) {
+                    $q->where('teacher_id', $teacherId);
+                });
+            } else {
+                return response()->json([]);
+            }
+        }
+
+        $schedules = $query->orderBy('start_time')->get();
 
         return response()->json($schedules);
     }
@@ -26,26 +47,25 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. Tambahkan validasi untuk teacher_id
         $request->validate([
             'class_id'   => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'day_of_week'=> 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'teacher_id' => 'required|exists:teachers,id', // WAJIB ada dan valid
+            'day_of_week'=> 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat', // Mengurangi hari Minggu/Sabtu jika tidak dipakai
             'start_time' => 'required|date_format:H:i',
             'end_time'   => 'required|date_format:H:i|after:start_time',
             'room'       => 'nullable|string',
         ]);
 
-        // Cari relasi class_subject_teacher
-        $cst = ClassSubjectTeacher::where('class_id', $request->class_id)
-            ->where('subject_id', $request->subject_id)
-            ->first();
+        // 2. Cari atau buat penugasan ClassSubjectTeacher secara otomatis jika belum ada
+        $cst = ClassSubjectTeacher::firstOrCreate([
+            'class_id'   => $request->class_id,
+            'subject_id' => $request->subject_id,
+            'teacher_id' => $request->teacher_id,
+        ]);
 
-        if (!$cst) {
-            return response()->json([
-                'message' => 'Kombinasi kelas dan mata pelajaran tidak memiliki guru yang terdaftar.'
-            ], 422);
-        }
-
+        // 3. Buat jadwal
         $schedule = Schedule::create([
             'class_subject_teacher_id' => $cst->id,
             'day_of_week' => $request->day_of_week,
@@ -59,29 +79,27 @@ class ScheduleController extends Controller
             'schedule' => $schedule->load('classSubjectTeacher'),
         ], 201);
     }
+
     /**
-     * Memperbarui jadwal yang ada (tanpa guru).
+     * Memperbarui jadwal yang ada.
      */
     public function update(Request $request, Schedule $schedule)
     {
         $request->validate([
             'class_id'   => 'required|exists:classes,id',
             'subject_id' => 'required|exists:subjects,id',
-            'day_of_week'=> 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'teacher_id' => 'required|exists:teachers,id', 
+            'day_of_week'=> 'required|string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
             'start_time' => 'required|date_format:H:i',
             'end_time'   => 'required|date_format:H:i|after:start_time',
             'room'       => 'nullable|string',
         ]);
 
-        $cst = ClassSubjectTeacher::where('class_id', $request->class_id)
-            ->where('subject_id', $request->subject_id)
-            ->first();
-
-        if (!$cst) {
-            return response()->json([
-                'message' => 'Kombinasi kelas dan mata pelajaran tidak memiliki guru yang terdaftar.'
-            ], 422);
-        }
+        $cst = ClassSubjectTeacher::firstOrCreate([
+            'class_id'   => $request->class_id,
+            'subject_id' => $request->subject_id,
+            'teacher_id' => $request->teacher_id,
+        ]);
 
         $schedule->update([
             'class_subject_teacher_id' => $cst->id,
@@ -119,5 +137,27 @@ class ScheduleController extends Controller
             'classes'  => $classes,
             'subjects' => $subjects,
         ]);
+    }
+
+     public function studentSchedule(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || $user->role !== 'siswa') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Cari ID siswa dari user yang login
+        $student = Student::where('user_id', $user->id)->firstOrFail();
+
+        // Cari jadwal berdasarkan class_id siswa
+        $schedules = Schedule::whereHas('classSubjectTeacher', function ($query) use ($student) {
+            $query->where('class_id', $student->class_id);
+        })
+        ->with('classSubjectTeacher.subject', 'classSubjectTeacher.teacher.user')
+        ->orderBy('day_of_week')
+        ->orderBy('start_time')
+        ->get();
+
+        return response()->json($schedules);
     }
 }

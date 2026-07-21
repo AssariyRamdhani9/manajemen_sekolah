@@ -10,11 +10,25 @@ use Illuminate\Validation\Rule;
 class SubjectController extends Controller
 {
     /**
-     * Menampilkan daftar semua mata pelajaran.
+     * Menampilkan daftar mata pelajaran (atau mapel yang diampu guru tertentu).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $subjects = Subject::all();
+        $teacherId = $request->query('teacher_id');
+
+        if ($teacherId) {
+            $subjects = Subject::whereHas('classSubjectTeachers', function ($q) use ($teacherId) {
+                $q->where('teacher_id', $teacherId);
+            })->get();
+
+            // Jika guru belum ada penugasan khusus, fallback ke semua mapel agar form tetap bisa diisi
+            if ($subjects->isEmpty()) {
+                $subjects = Subject::all();
+            }
+        } else {
+            $subjects = Subject::all();
+        }
+
         return response()->json($subjects);
     }
 

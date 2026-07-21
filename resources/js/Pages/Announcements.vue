@@ -1,0 +1,96 @@
+<template>
+  <AppLayout :role="userRole">
+    <!-- Header Page -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Pengumuman Sekolah</h1>
+        <p class="text-xs text-slate-500 mt-1">Informasi penting dan pengumuman resmi akademik.</p>
+      </div>
+
+      <button
+        v-if="user.role === 'admin' || user.role === 'teacher' || user.role === 'guru'"
+        @click="showForm = true"
+        class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95 w-fit"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Buat Pengumuman Baru</span>
+      </button>
+    </div>
+
+    <!-- Announcements List -->
+    <div class="space-y-4 max-w-4xl">
+      <div 
+        v-for="announcement in announcements" 
+        :key="announcement.id" 
+        class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Target: {{ announcement.target_audience || 'Semua' }}
+            </span>
+            <h2 class="text-lg font-bold text-slate-900 mt-2">{{ announcement.title }}</h2>
+          </div>
+          <span class="text-xs text-slate-400 font-medium shrink-0">{{ formatDate(announcement.created_at) }}</span>
+        </div>
+
+        <p class="text-xs text-slate-600 mt-3 leading-relaxed whitespace-pre-line">{{ announcement.content }}</p>
+
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+          <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-[10px]">
+            {{ announcement.user && announcement.user.full_name ? announcement.user.full_name[0] : 'A' }}
+          </div>
+          <span>Diposting oleh: <strong class="text-slate-700">{{ announcement.user ? announcement.user.full_name : 'Admin' }}</strong></span>
+        </div>
+      </div>
+
+      <div v-if="!announcements.length" class="bg-white rounded-3xl border border-slate-200/80 p-12 text-center text-slate-400 text-xs">
+        Belum ada pengumuman yang publikasikan saat ini.
+      </div>
+    </div>
+
+    <AnnouncementForm v-if="showForm" @close="showForm = false" @saved="fetchAnnouncements" />
+  </AppLayout>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
+import AppLayout from '@/Layouts/AppLayout.vue'
+import AnnouncementForm from '@/Components/AnnouncementForm.vue'
+import { useAuthStore } from '@/stores/auth'
+
+const announcements = ref([])
+const showForm = ref(false)
+const authStore = useAuthStore()
+const user = computed(() => authStore.user || {})
+const userRole = computed(() => user.value.role || 'siswa')
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  try {
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  } catch (e) {
+    return dateStr
+  }
+}
+
+const fetchAnnouncements = async () => {
+  try {
+    const response = await axios.get('/api/announcements')
+    announcements.value = response.data
+  } catch (error) {
+    console.error('Gagal mengambil pengumuman:', error)
+  }
+}
+
+onMounted(() => {
+  fetchAnnouncements()
+})
+</script>

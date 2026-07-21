@@ -10,11 +10,25 @@ use Illuminate\Validation\Rule;
 class ClassController extends Controller
 {
     /**
-     * Menampilkan daftar semua kelas.
+     * Menampilkan daftar semua kelas (atau kelas yang diampu guru tertentu).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $classes = Classes::all();
+        $teacherId = $request->query('teacher_id');
+
+        if ($teacherId) {
+            $classes = Classes::whereHas('classSubjectTeachers', function ($q) use ($teacherId) {
+                $q->where('teacher_id', $teacherId);
+            })->get();
+
+            // Jika guru belum punya penugasan khusus, fallback ke semua kelas agar form tetap bisa diisi
+            if ($classes->isEmpty()) {
+                $classes = Classes::all();
+            }
+        } else {
+            $classes = Classes::all();
+        }
+
         return response()->json($classes);
     }
 

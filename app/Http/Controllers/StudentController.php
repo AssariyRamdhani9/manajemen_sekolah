@@ -32,6 +32,7 @@ class StudentController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
             'nis' => 'required|string|unique:students,nis',
             'class_id' => 'required|exists:classes,id',
             'date_of_birth' => 'nullable|date',
@@ -46,8 +47,8 @@ class StudentController extends Controller
             $user = User::create([
                 'full_name' => $request->full_name,
                 'email' => $request->email,
-                'password' => Hash::make('password123'), // Atur password default yang aman
-                'role' => 'student',
+                'password' => Hash::make($request->password),
+                'role' => 'siswa',
             ]);
 
             // 3. Buat entri baru di tabel 'students' menggunakan ID dari user yang baru dibuat
