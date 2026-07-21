@@ -29,6 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/attendances', [\App\Http\Controllers\AttendanceController::class, 'index']);
     Route::post('/attendances', [\App\Http\Controllers\AttendanceController::class, 'store']);
     
+    Route::get('/grades', [\App\Http\Controllers\GradeController::class, 'index']);
+    Route::post('/grades', [\App\Http\Controllers\GradeController::class, 'store']);
+    Route::get('/student/report', [\App\Http\Controllers\GradeController::class, 'studentReport']);
+    
     // PERBAIKAN KRUSIAL DI SINI: Memuat relasi teacher
     // Ini memastikan frontend mendapatkan teacher.id = 1 (yang benar)
     Route::get('/user', function (Request $request) {

@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teacher/materials', fn() => Inertia::render('Guru/ManageMaterials'));
         Route::get('/teacher/assignments', fn() => Inertia::render('Guru/ManageAssignments'));
         Route::get('/teacher/attendances', fn() => Inertia::render('Guru/ManageAttendance'));
+        Route::get('/teacher/grades', fn() => Inertia::render('Guru/ManageGrades'));
         Route::get('/teacher/announcements', fn() => Inertia::render('Announcements'));
         Route::get('/guru/announcements', fn() => Inertia::render('Announcements'));
     });
@@ -69,12 +70,15 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:siswa')->group(function () {
         Route::get('/student/schedules', fn() => Inertia::render('Siswa/StudentSchedule'));
         Route::get('/student/assignments', fn() => Inertia::render('Siswa/MyAssignments'));
+        Route::get('/student/report', fn() => Inertia::render('Siswa/StudentReport'));
         Route::get('/student/announcements', fn() => Inertia::render('Announcements'));
         Route::get('/siswa/announcements', fn() => Inertia::render('Announcements'));
     });
 
-    // Admin announcement page
+    // Admin & Print pages
     Route::middleware('role:admin')->group(function () {
         Route::get('/admin/announcements', fn() => Inertia::render('Announcements'));
     });
+
+    Route::get('/report/print/{student_id?}', fn($student_id = null) => Inertia::render('ReportPrint', ['studentId' => $student_id]));
 });
