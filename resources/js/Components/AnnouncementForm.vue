@@ -117,10 +117,10 @@ const subjects = ref([])
 
 const fetchInitialData = async () => {
   try {
-    const classesResponse = await axios.get('/api/admin/classes')
+    const classesResponse = await axios.get('/api/guru/classes')
     classes.value = classesResponse.data
 
-    const subjectsResponse = await axios.get('/api/admin/subjects')
+    const subjectsResponse = await axios.get('/api/guru/subjects')
     subjects.value = subjectsResponse.data
   } catch (error) {
     console.error('Gagal mengambil data kelas/mata pelajaran:', error)

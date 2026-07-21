@@ -61,26 +61,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teacher/materials', fn() => Inertia::render('Guru/ManageMaterials'));
         Route::get('/teacher/assignments', fn() => Inertia::render('Guru/ManageAssignments'));
         Route::get('/teacher/attendances', fn() => Inertia::render('Guru/ManageAttendance'));
+        Route::get('/teacher/announcements', fn() => Inertia::render('Announcements'));
+        Route::get('/guru/announcements', fn() => Inertia::render('Announcements'));
     });
 
     // Student pages
     Route::middleware('role:siswa')->group(function () {
         Route::get('/student/schedules', fn() => Inertia::render('Siswa/StudentSchedule'));
         Route::get('/student/assignments', fn() => Inertia::render('Siswa/MyAssignments'));
-        Route::get('/student/announcements', function () {
-            return Inertia::render('Announcements');
-        })->name('siswa.announcements');
+        Route::get('/student/announcements', fn() => Inertia::render('Announcements'));
+        Route::get('/siswa/announcements', fn() => Inertia::render('Announcements'));
     });
 
-    Route::middleware('role:guru,teacher')->prefix('guru')->group(function () {
-        Route::get('/announcements', function () {
-            return Inertia::render('Announcements');
-        })->name('teacher.announcements');
-    });
-
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
-        Route::get('/announcements', function () {
-            return Inertia::render('Announcements');
-        })->name('admin.announcements');
+    // Admin announcement page
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin/announcements', fn() => Inertia::render('Announcements'));
     });
 });

@@ -23,7 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::get('/announcements', [AnnouncementController::class, 'index']);
-    Route::post('/announcements', [AnnouncementController::class, 'store'])->middleware('role:admin,teacher');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->middleware('role:admin,teacher,guru');
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->middleware('role:admin,teacher,guru');
     
     Route::get('/attendances', [\App\Http\Controllers\AttendanceController::class, 'index']);
     Route::post('/attendances', [\App\Http\Controllers\AttendanceController::class, 'store']);

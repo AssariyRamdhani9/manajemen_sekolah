@@ -133,15 +133,21 @@
 
         <!-- Announcements Card -->
         <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-          <h3 class="text-base font-bold text-slate-900 mb-4">Pengumuman Baru</h3>
-          <div class="space-y-3">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-slate-900">Pengumuman Baru</h3>
+            <Link href="/teacher/announcements" class="text-xs font-semibold text-emerald-600 hover:underline">Lihat Semua</Link>
+          </div>
+          <div v-if="announcements.length" class="space-y-3">
             <div v-for="ann in announcements" :key="ann.id" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/60">
               <div class="flex justify-between items-start">
                 <h5 class="font-bold text-slate-800 text-xs">{{ ann.title }}</h5>
-                <span class="text-[10px] text-slate-400">{{ ann.time }}</span>
+                <span class="text-[10px] text-slate-400 shrink-0 ml-2">{{ ann.created_at ? new Date(ann.created_at).toLocaleDateString('id-ID') : '' }}</span>
               </div>
-              <p class="text-xs text-slate-600 mt-1 leading-relaxed">{{ ann.excerpt }}</p>
+              <p class="text-xs text-slate-600 mt-1 leading-relaxed line-clamp-2">{{ ann.content }}</p>
             </div>
+          </div>
+          <div v-else class="text-center py-6 text-slate-400 text-xs">
+            Belum ada pengumuman baru.
           </div>
         </div>
       </div>
@@ -150,8 +156,9 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { Link } from '@inertiajs/vue3'
+import { ref, reactive, onMounted } from 'vue'
+import { Link, router } from '@inertiajs/vue3'
+import axios from 'axios'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const summary = reactive({
@@ -161,17 +168,14 @@ const summary = reactive({
 })
 
 const announcements = ref([])
-
 const todaySchedule = ref([])
 
 const today = new Date()
 const todayFull = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
 const todayShort = today.toLocaleDateString('id-ID')
 
-import { router } from '@inertiajs/vue3'
-
 const refreshAll = () => {
-  summary.students += Math.floor(Math.random() * 2)
+  fetchAnnouncements()
 }
 
 const goToAttendance = (item) => {
@@ -181,4 +185,17 @@ const goToAttendance = (item) => {
 const createAssignment = (item) => {
   router.visit('/teacher/assignments')
 }
+
+const fetchAnnouncements = async () => {
+  try {
+    const res = await axios.get('/api/announcements')
+    announcements.value = res.data
+  } catch (e) {
+    console.error('Gagal memuat pengumuman:', e)
+  }
+}
+
+onMounted(() => {
+  fetchAnnouncements()
+})
 </script>
